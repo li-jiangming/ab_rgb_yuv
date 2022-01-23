@@ -17,8 +17,13 @@ int main(int argc, char *argv[]) {
                "\t2. bgr24 --> nv21\n"
                "\t3. nv12 --> rgb24\n"
                "\t4. nv21 --> bgr24\n"
-               "\t5. nv12 <-> nv21\n"
-               "\t6. rgb24 <-> bgr24\n", argv[0]);
+               "\t5. rgb24 --> yuv420p\n"
+               "\t6. bgr24 --> yvu420p\n"
+               "\t7. yuv420p --> rgb24\n"
+               "\t8. yvu420p --> bgr24\n"
+               "\t9. nv12 <-> nv21\n"
+               "\t10. rgb24 <-> bgr24\n"
+               "\t11. yuv420p <-> yvu420p\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -52,9 +57,19 @@ int main(int argc, char *argv[]) {
         else if (4 == csc)
             out_size = nv21_to_bgr(file_data, width, height, buf, buf_size);
         else if (5 == csc)
-            out_size = convert_nv12_nv21(file_data, width, height);
+            out_size = rgb_to_yuv420p(file_data, width, height, buf, buf_size);
         else if (6 == csc)
+            out_size = bgr_to_yvu420p(file_data, width, height, buf, buf_size);
+        else if (7 == csc)
+            out_size = yuv420p_to_rgb(file_data, width, height, buf, buf_size);
+        else if (8 == csc)
+            out_size = yvu420p_to_bgr(file_data, width, height, buf, buf_size);
+        else if (9 == csc)
+            out_size = convert_nv12_nv21(file_data, width, height);
+        else if (10 == csc)
             out_size = convert_rgb_bgr(file_data, width, height);
+        else if (11 == csc)
+            out_size = convert_yuv420p_yvu420p(file_data, width, height);
         else {
             free(buf);
             buf = NULL;
@@ -66,7 +81,7 @@ int main(int argc, char *argv[]) {
 
         file = fopen(out_file, "wb");
         if (file != NULL) {
-            if (5 == csc || 6 == csc)
+            if (9 == csc || 10 == csc || 11 == csc)
                 fwrite(file_data, 1, out_size, file);
             else
                 fwrite(buf, 1, out_size, file);
