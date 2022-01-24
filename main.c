@@ -23,7 +23,11 @@ int main(int argc, char *argv[]) {
                "\t8. yvu420p --> bgr24\n"
                "\t9. nv12 <-> nv21\n"
                "\t10. rgb24 <-> bgr24\n"
-               "\t11. yuv420p <-> yvu420p\n", argv[0]);
+               "\t11. yuv420p <-> yvu420p\n"
+               "\t12. yuv420p --> yuv420sp/nv12\n"
+               "\t13. yvu420p --> yvu420sp/nv21\n"
+               "\t14. yuv420sp/nv12 --> yuv420p\n"
+               "\t15. yvu420sp/nv21 --> yvu420p\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -70,6 +74,18 @@ int main(int argc, char *argv[]) {
             out_size = convert_rgb_bgr(file_data, width, height);
         else if (11 == csc)
             out_size = convert_yuv420p_yvu420p(file_data, width, height);
+        else if (12 == csc)
+            out_size = yuv420p_to_yuv420sp(file_data, width, height,
+                buf, buf_size);
+        else if (13 == csc)
+            out_size = yvu420p_to_yvu420sp(file_data, width, height,
+                buf, buf_size);
+        else if (14 == csc)
+            out_size = yuv420sp_to_yuv420p(file_data, width, height,
+                buf, buf_size);
+        else if (15 == csc)
+            out_size = yvu420sp_to_yvu420p(file_data, width, height,
+                buf, buf_size);
         else {
             free(buf);
             buf = NULL;

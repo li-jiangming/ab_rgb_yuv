@@ -7,16 +7,19 @@
 #include "conv_rgb_yuv.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 /*
+ * BT.601-6 (NTSC色域)
+ *
  * YUV --> RGB
- *      R = (298Y + 411 * V - 57344)>>8
- *      G = (298Y - 101* U- 211* V+ 34739)>>8
- *      B = (298Y + 519 U- 71117)>>8
+ *      R = (298Y + 411V - 57344)>>8
+ *      G = (298Y - 101U - 211V+ 34739)>>8
+ *      B = (298Y + 519U - 71117)>>8
  * RGB --> YUV
- *      Y = ( 66R + 129G + 25B)>>8 + 16
- *      U = (-38R - 74G + 112B)>>8 +128
- *      V = (112R - 94G - 18*B)>>8 + 128
+ *      Y = ( 66R + 129G +  25B)>>8 + 16
+ *      U = (-38R -  74G + 112B)>>8 + 128
+ *      V = (112R -  94G -  18B)>>8 + 128
  */
 
 static unsigned int clip_value(int value, int min, int max) {
@@ -41,7 +44,7 @@ static void rgb_to_yuv_pixel(int r, int g, int b,
     }
 }
 
-static void yuv_to_rgb_pixel(int y, int u, int v, 
+static void yuv_to_rgb_pixel(int y, int u, int v,
         unsigned char *r, unsigned char *g, unsigned char *b) {
     int shift = 8;
     int offset1 = -57344, offset2 = 34739, offset3 = -71117;
@@ -242,7 +245,7 @@ unsigned int bgr_to_yvu420p(const unsigned char *bgr,
             unsigned int rgb_offset = (width * h + w) * 3;
             unsigned int y_offset   = width * h + w;
             unsigned int v_offset   = width * height + (width * h / 2 + w) / 2;
-            unsigned int u_offset   = width * height * 5 / 4 + 
+            unsigned int u_offset   = width * height * 5 / 4 +
                                       (width * h / 2 + w) / 2;
             int b = *(bgr + rgb_offset);
             int g = *(bgr + rgb_offset + 1);
@@ -295,7 +298,7 @@ unsigned int nv12_to_rgb(const unsigned char *nv12,
             unsigned int y_offset    = width * h + w;
             unsigned int rgb_offset  = (width * h + w) * 3;
             int y = nv12[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     rgb_buf + rgb_offset,
                     rgb_buf + rgb_offset + 1,
                     rgb_buf + rgb_offset + 2);
@@ -304,7 +307,7 @@ unsigned int nv12_to_rgb(const unsigned char *nv12,
             y_offset    += 1;
             rgb_offset  += 3;
             y = nv12[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     rgb_buf + rgb_offset,
                     rgb_buf + rgb_offset + 1,
                     rgb_buf + rgb_offset + 2);
@@ -313,7 +316,7 @@ unsigned int nv12_to_rgb(const unsigned char *nv12,
             y_offset    = width * (h + 1) + w;
             rgb_offset  = (width * (h + 1) + w) * 3;
             y = nv12[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     rgb_buf + rgb_offset,
                     rgb_buf + rgb_offset + 1,
                     rgb_buf + rgb_offset + 2);
@@ -322,7 +325,7 @@ unsigned int nv12_to_rgb(const unsigned char *nv12,
             y_offset    += 1;
             rgb_offset  += 3;
             y = nv12[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     rgb_buf + rgb_offset,
                     rgb_buf + rgb_offset + 1,
                     rgb_buf + rgb_offset + 2);
@@ -349,7 +352,7 @@ unsigned int nv21_to_bgr(const unsigned char *nv21,
             unsigned int y_offset    = width * h + w;
             unsigned int rgb_offset  = (width * h + w) * 3;
             int y = nv21[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     bgr_buf + rgb_offset + 2,
                     bgr_buf + rgb_offset + 1,
                     bgr_buf + rgb_offset);
@@ -358,7 +361,7 @@ unsigned int nv21_to_bgr(const unsigned char *nv21,
             y_offset    += 1;
             rgb_offset  += 3;
             y = nv21[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     bgr_buf + rgb_offset + 2,
                     bgr_buf + rgb_offset + 1,
                     bgr_buf + rgb_offset);
@@ -367,7 +370,7 @@ unsigned int nv21_to_bgr(const unsigned char *nv21,
             y_offset    = width * (h + 1) + w;
             rgb_offset  = (width * (h + 1) + w) * 3;
             y = nv21[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     bgr_buf + rgb_offset + 2,
                     bgr_buf + rgb_offset + 1,
                     bgr_buf + rgb_offset);
@@ -376,7 +379,7 @@ unsigned int nv21_to_bgr(const unsigned char *nv21,
             y_offset    += 1;
             rgb_offset  += 3;
             y = nv21[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     bgr_buf + rgb_offset + 2,
                     bgr_buf + rgb_offset + 1,
                     bgr_buf + rgb_offset);
@@ -405,7 +408,7 @@ unsigned int yuv420p_to_rgb(const unsigned char *yuv420p,
             unsigned y_offset    = width * h + w;
             unsigned int rgb_offset  = (width * h + w) * 3;
             int y = yuv420p[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     rgb_buf + rgb_offset,
                     rgb_buf + rgb_offset + 1,
                     rgb_buf + rgb_offset + 2);
@@ -414,7 +417,7 @@ unsigned int yuv420p_to_rgb(const unsigned char *yuv420p,
             y_offset    += 1;
             rgb_offset  += 3;
             y = yuv420p[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     rgb_buf + rgb_offset,
                     rgb_buf + rgb_offset + 1,
                     rgb_buf + rgb_offset + 2);
@@ -423,7 +426,7 @@ unsigned int yuv420p_to_rgb(const unsigned char *yuv420p,
             y_offset    = width * (h + 1) + w;
             rgb_offset  = (width * (h + 1) + w) * 3;
             y = yuv420p[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     rgb_buf + rgb_offset,
                     rgb_buf + rgb_offset + 1,
                     rgb_buf + rgb_offset + 2);
@@ -432,7 +435,7 @@ unsigned int yuv420p_to_rgb(const unsigned char *yuv420p,
             y_offset    += 1;
             rgb_offset  += 3;
             y = yuv420p[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     rgb_buf + rgb_offset,
                     rgb_buf + rgb_offset + 1,
                     rgb_buf + rgb_offset + 2);
@@ -461,7 +464,7 @@ unsigned int yvu420p_to_bgr(const unsigned char *yvu420p,
             unsigned int y_offset    = width * h + w;
             unsigned int rgb_offset  = (width * h + w) * 3;
             int y = yvu420p[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     bgr_buf + rgb_offset + 2,
                     bgr_buf + rgb_offset + 1,
                     bgr_buf + rgb_offset);
@@ -470,7 +473,7 @@ unsigned int yvu420p_to_bgr(const unsigned char *yvu420p,
             y_offset    += 1;
             rgb_offset  += 3;
             y = yvu420p[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     bgr_buf + rgb_offset + 2,
                     bgr_buf + rgb_offset + 1,
                     bgr_buf + rgb_offset);
@@ -479,7 +482,7 @@ unsigned int yvu420p_to_bgr(const unsigned char *yvu420p,
             y_offset    = width * (h + 1) + w;
             rgb_offset  = (width * (h + 1) + w) * 3;
             y = yvu420p[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     bgr_buf + rgb_offset + 2,
                     bgr_buf + rgb_offset + 1,
                     bgr_buf + rgb_offset);
@@ -488,7 +491,7 @@ unsigned int yvu420p_to_bgr(const unsigned char *yvu420p,
             y_offset    += 1;
             rgb_offset  += 3;
             y = yvu420p[y_offset];
-            yuv_to_rgb_pixel(y, u, v, 
+            yuv_to_rgb_pixel(y, u, v,
                     bgr_buf + rgb_offset + 2,
                     bgr_buf + rgb_offset + 1,
                     bgr_buf + rgb_offset);
@@ -496,4 +499,57 @@ unsigned int yvu420p_to_bgr(const unsigned char *yvu420p,
     }
 
     return width * height * 3;
+}
+
+unsigned int yuv420p_to_yuv420sp(const unsigned char *yuv420p,
+        unsigned short width, unsigned short height,
+        unsigned char *yuv420sp_buf, unsigned int buf_size) {
+    if (buf_size < width * height * 3 / 2)
+        return 0;
+
+    unsigned int y_size = width * height;
+    memcpy(yuv420sp_buf, yuv420p, y_size);
+
+    unsigned int uv_size    = width * height / 2;
+    unsigned int u_offset   = width * height;
+    unsigned int v_offset   = width * height * 5 / 4;
+
+    for (unsigned int i = 0; i < uv_size; i += 2) {
+        yuv420sp_buf[y_size + i]     = yuv420p[u_offset++];
+        yuv420sp_buf[y_size + i + 1] = yuv420p[v_offset++];
+    }
+
+    return width * height * 3 / 2;
+}
+
+unsigned int yuv420sp_to_yuv420p(const unsigned char *yuv420sp,
+        unsigned short width, unsigned short height,
+        unsigned char *yuv420p_buf, unsigned int buf_size) {
+    if (buf_size < width * height * 3 / 2)
+        return 0;
+
+    unsigned int y_size = width * height;
+    memcpy(yuv420p_buf, yuv420sp, y_size);
+
+    unsigned int uv_size    = width * height / 2;
+    unsigned int u_offset   = width * height;
+    unsigned int v_offset   = width * height * 5 / 4;
+    for (unsigned int i = 0; i < uv_size; i += 2) {
+        yuv420p_buf[u_offset++] = yuv420sp[y_size + i];
+        yuv420p_buf[v_offset++] = yuv420sp[y_size + i + 1];
+    }
+
+    return width * height * 3 / 2;
+}
+
+unsigned int yvu420p_to_yvu420sp(const unsigned char *yvu420p,
+        unsigned short width, unsigned short height,
+        unsigned char *yvu420sp_buf, unsigned int buf_size) {
+    return yuv420p_to_yuv420sp(yvu420p, width, height, yvu420sp_buf, buf_size);
+}
+
+unsigned int yvu420sp_to_yvu420p(const unsigned char *yvu420sp,
+        unsigned short width, unsigned short height,
+        unsigned char *yvu420p_buf, unsigned int buf_size) {
+    return yuv420sp_to_yuv420p(yvu420sp, width, height, yvu420p_buf, buf_size);
 }
