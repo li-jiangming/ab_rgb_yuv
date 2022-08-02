@@ -1,6 +1,7 @@
 /*
  * main.c
- *  Created on: 2022年1月19日
+ *
+ *  Created on: 2022/1/19
  *      Author: ljm
  */
 
@@ -13,15 +14,15 @@ int main(int argc, char *argv[]) {
     if (argc < 6) {
         printf("Usage: %s csc in_file out_file width height\n"
                "csc:\n"
-               "\t1. rgb24 --> nv12\n"
-               "\t2. bgr24 --> nv21\n"
-               "\t3. nv12 --> rgb24\n"
-               "\t4. nv21 --> bgr24\n"
+               "\t1. rgb24 --> yuv420sp/nv12\n"
+               "\t2. bgr24 --> yvu420sp/nv21\n"
+               "\t3. yuv420sp/nv12 --> rgb24\n"
+               "\t4. yvu420sp/nv21 --> bgr24\n"
                "\t5. rgb24 --> yuv420p\n"
                "\t6. bgr24 --> yvu420p\n"
                "\t7. yuv420p --> rgb24\n"
                "\t8. yvu420p --> bgr24\n"
-               "\t9. nv12 <-> nv21\n"
+               "\t9. yuv420sp/nv12 <-> yvu420sp/nv21\n"
                "\t10. rgb24 <-> bgr24\n"
                "\t11. yuv420p <-> yvu420p\n"
                "\t12. yuv420p --> yuv420sp/nv12\n"
@@ -53,13 +54,13 @@ int main(int argc, char *argv[]) {
 
         int out_size = 0;
         if (1 == csc)
-            out_size = rgb_to_nv12(file_data, width, height, buf, buf_size);
+            out_size = rgb_to_yuv420sp(file_data, width, height, buf, buf_size);
         else if (2 == csc)
-            out_size = bgr_to_nv21(file_data, width, height, buf, buf_size);
+            out_size = bgr_to_yvu420sp(file_data, width, height, buf, buf_size);
         else if (3 == csc)
-            out_size = nv12_to_rgb(file_data, width, height, buf, buf_size);
+            out_size = yuv420sp_to_rgb(file_data, width, height, buf, buf_size);
         else if (4 == csc)
-            out_size = nv21_to_bgr(file_data, width, height, buf, buf_size);
+            out_size = yvu420sp_to_bgr(file_data, width, height, buf, buf_size);
         else if (5 == csc)
             out_size = rgb_to_yuv420p(file_data, width, height, buf, buf_size);
         else if (6 == csc)
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]) {
         else if (8 == csc)
             out_size = yvu420p_to_bgr(file_data, width, height, buf, buf_size);
         else if (9 == csc)
-            out_size = convert_nv12_nv21(file_data, width, height);
+            out_size = convert_yuv420sp_yvu420sp(file_data, width, height);
         else if (10 == csc)
             out_size = convert_rgb_bgr(file_data, width, height);
         else if (11 == csc)
